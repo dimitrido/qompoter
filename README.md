@@ -166,6 +166,15 @@ qompoter refresh-vendor-cmake
 
 This is useful if you manually add or remove packages from the vendor directory or if you need to update the CMake configuration without re-downloading dependencies.
 
+### Complete CMake Example
+
+For a complete working example with a library package and consumer project, see the [examples/cmake-example](examples/cmake-example/) directory. The example includes:
+
+- A sample library with proper CMake package configuration
+- A project that consumes the library using Qompoter
+- Step-by-step instructions for building and running
+- Detailed comments explaining each part
+
 Let's start coding!
 
 During development, if you want to change / upgrade the version of an existing package, add or remove packages: update the `qompoter.json` file accordingly and run again `qompoter update`.
