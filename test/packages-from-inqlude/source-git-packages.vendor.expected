@@ -570,4 +570,5 @@ vendor/glc-lib/src/plugins
 vendor/glc-lib/src/plugins/GLC_ViewerItem
 vendor/glc-lib/src/plugins/plugins.pro
 vendor/qompote.pri
+vendor/vendor.cmake
 vendor/vendor.pri

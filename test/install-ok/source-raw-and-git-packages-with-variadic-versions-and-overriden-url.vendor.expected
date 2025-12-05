@@ -50,4 +50,5 @@ vendor/posibrain/test
 vendor/posibrain/test/Posibrain
 vendor/posibrain/test/Posibrain/TchatBotConfigTest.php
 vendor/qompote.pri
+vendor/vendor.cmake
 vendor/vendor.pri

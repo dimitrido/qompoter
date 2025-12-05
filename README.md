@@ -110,12 +110,35 @@ qompoter update
 
 *For more information about the command line options, use `qompoter --help` or check the [online help](docs/Command-line.md).*
 
-That's it! Qompoter has downloaded all required dependencies into the `vendor` directory and you can now include `vendor.pri` in the `.pro` file of your project, and use the dependencies that you required:
+That's it! Qompoter has downloaded all required dependencies into the `vendor` directory.
+
+### Using with QMake
+
+You can now include `vendor.pri` in the `.pro` file of your project, and use the dependencies that you required:
 
 ```qmake
 CONFIG += luke leia yoda han
 include(vendor/vendor.pri)
 ```
+
+### Using with CMake
+
+For CMake projects, Qompoter generates a `vendor.cmake` file that automatically adds all dependencies with CMake support to the search path. Include it in your CMakeLists.txt:
+
+```cmake
+cmake_minimum_required(VERSION 3.10)
+project(YourProject)
+
+# Include vendor.cmake to add all dependencies with CMake support
+include(vendor/vendor.cmake)
+
+# Now you can use find_package() for dependencies
+find_package(luke REQUIRED)
+find_package(leia REQUIRED)
+find_package(yoda REQUIRED)
+```
+
+Note: Qompoter assumes that each dependency contains a CMake package in a `cmake/` folder at the root of the project. Only dependencies with a `cmake/` directory will be added to the CMake search path.
 
 Let's start coding!
 
