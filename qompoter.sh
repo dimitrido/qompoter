@@ -1817,6 +1817,7 @@ refreshVendorPriFromQompoterLock()
   for packageInfo in ${requires}; do
       local vendorName
       local projectName
+      local packageName
       vendorName=$(echo "${packageInfo}" | cut -d'/' -f1)
       packageName=$(echo "${packageInfo}" | cut -d'/' -f2)
       local qompoterPriFile=${vendorDir}/${packageName}/qompoter.pri
@@ -2596,7 +2597,7 @@ refreshVendorCmakeAction()
   checkQompoterFile "${qompoterLockFile}" || return 100
   
   # Generate first part of the vendor.cmake file (in a temporary file)
-  createVendorCmake ${vendorCmakeFile}.tmp
+  createVendorCmake "${vendorCmakeFile}.tmp"
   
   # Loop on lock file and add each package cmake directory into the temporary vendor.cmake file
   refreshVendorCmakeFromQompoterLock "${qompoterLockFile}" "${vendorDir}"
@@ -2604,7 +2605,7 @@ refreshVendorCmakeAction()
 
   # Replace existing vendor.cmake file in case of success
   if [[ "${IS_DRYRUN}" == "1" ]]; then
-    diff -q ${vendorCmakeFile} ${vendorCmakeFile}.tmp > /dev/null 2>&1
+    diff -q "${vendorCmakeFile}" "${vendorCmakeFile}.tmp" > /dev/null 2>&1
     if [[ "$?" == 1 ]]; then
       echo "Changes to be expected on ${vendorCmakeFile}"
     else
@@ -2613,7 +2614,7 @@ refreshVendorCmakeAction()
     echo
   else
     if [[ "${globalRes}" == 0 ]] || [[ "${IS_BYPASS}" == "1" ]]; then
-      diff -q ${vendorCmakeFile} ${vendorCmakeFile}.tmp > /dev/null 2>&1
+      diff -q "${vendorCmakeFile}" "${vendorCmakeFile}.tmp" > /dev/null 2>&1
       if [[ "$?" == 1 ]]; then
         echo "Changes applied on ${vendorCmakeFile}"
       else

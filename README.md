@@ -140,6 +140,32 @@ find_package(yoda REQUIRED)
 
 Note: Qompoter assumes that each dependency contains a CMake package in a `cmake/` folder at the root of the project. Only dependencies with a `cmake/` directory will be added to the CMake search path.
 
+### CMake Package Structure
+
+For a dependency to be usable with CMake through Qompoter, it should have the following structure:
+
+```
+my-dependency/
+├── cmake/
+│   ├── my-dependencyConfig.cmake     # CMake package configuration file
+│   └── my-dependencyConfigVersion.cmake  # (optional) Version file
+├── include/
+│   └── ... (header files)
+├── src/
+│   └── ... (source files)
+└── qompoter.json
+```
+
+The `cmake/` directory should contain at minimum a `<PackageName>Config.cmake` file that defines the package for CMake's `find_package()` command. Qompoter will automatically add the package root directory to `CMAKE_PREFIX_PATH`, allowing CMake to discover the package.
+
+You can regenerate the `vendor.cmake` file at any time using:
+
+```bash
+qompoter refresh-vendor-cmake
+```
+
+This is useful if you manually add or remove packages from the vendor directory or if you need to update the CMake configuration without re-downloading dependencies.
+
 Let's start coding!
 
 During development, if you want to change / upgrade the version of an existing package, add or remove packages: update the `qompoter.json` file accordingly and run again `qompoter update`.
