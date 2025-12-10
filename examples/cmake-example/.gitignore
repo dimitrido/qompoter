@@ -1,0 +1,25 @@
+# Build directories
+build/
+my-project/build/
+
+# Vendor directory (downloaded by Qompoter)
+my-project/vendor/
+
+# Qompoter lock file
+my-project/qompoter.lock
+
+# Local repository used for testing
+local-repo/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.exe
+my-app

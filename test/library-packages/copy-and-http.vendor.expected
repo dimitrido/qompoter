@@ -13,4 +13,5 @@ vendor/qompoter-test-package/qompoter.json
 vendor/qompoter-test-package4git
 vendor/qompoter-test-package4git/README.md
 vendor/qompoter-test-package4git/qompoter.json
+vendor/vendor.cmake
 vendor/vendor.pri

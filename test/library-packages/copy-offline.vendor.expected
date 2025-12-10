@@ -9,4 +9,5 @@ vendor/lib_linux_64
 vendor/lib_linux_64/acme_fake.a
 vendor/lib_linux_64/fylhan3_fake.a
 vendor/qompote.pri
+vendor/vendor.cmake
 vendor/vendor.pri

@@ -1,0 +1,13 @@
+{
+  "name": "example/my-project",
+  "description": "Example project using CMake and Qompoter",
+  "authors": [
+    {
+      "name": "Qompoter Example",
+      "homepage": "https://github.com/fylhan/qompoter"
+    }
+  ],
+  "require": {
+    "example/my-library": "v1.0.0"
+  }
+}

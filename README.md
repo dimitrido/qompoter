@@ -110,12 +110,77 @@ qompoter update
 
 *For more information about the command line options, use `qompoter --help` or check the [online help](docs/Command-line.md).*
 
-That's it! Qompoter has downloaded all required dependencies into the `vendor` directory and you can now include `vendor.pri` in the `.pro` file of your project, and use the dependencies that you required:
+That's it! Qompoter has downloaded all required dependencies into the `vendor` directory.
+
+### Using with QMake
+
+You can now include `vendor.pri` in the `.pro` file of your project, and use the dependencies that you required:
 
 ```qmake
 CONFIG += luke leia yoda han
 include(vendor/vendor.pri)
 ```
+
+### Using with CMake
+
+For CMake projects, Qompoter provides two workflows:
+
+#### Workflow 1: FetchContent (Recommended)
+
+Qompoter generates a `vendor.cmake` file using CMake's FetchContent to declare and make dependencies available:
+
+```cmake
+cmake_minimum_required(VERSION 3.14)
+project(YourProject)
+
+# Include vendor.cmake to declare all dependencies via FetchContent
+include(vendor/vendor.cmake)
+
+# Dependencies are now available for use
+target_link_libraries(your_target PRIVATE luke leia yoda)
+```
+
+**Building dependencies**: After running `qompoter update`, build all dependencies with:
+
+```bash
+qompoter build
+```
+
+This builds each dependency in order and installs them to `vendor/install` by default, making them available to dependent packages.
+
+#### CMake Dependency Structure
+
+For a dependency to work with Qompoter's CMake integration, it needs:
+
+```
+my-dependency/
+├── CMakeLists.txt              # CMake build configuration
+├── include/
+│   └── ... (header files)
+├── src/
+│   └── ... (source files)
+└── qompoter.json
+```
+
+The `CMakeLists.txt` should:
+- Define targets with `add_library()` or `add_executable()`
+- Set up proper install rules with `install(TARGETS ...)` and `install(EXPORT ...)`
+- Use generator expressions for include directories (e.g., `$<BUILD_INTERFACE:...>` and `$<INSTALL_INTERFACE:...>`)
+
+#### Commands
+
+- **Fetch dependencies**: `qompoter update` - Downloads dependencies and generates `vendor.cmake`
+- **Build dependencies**: `qompoter build` - Builds and installs all dependencies
+- **Regenerate vendor.cmake**: `qompoter refresh-vendor-cmake` - Updates the CMake file without re-downloading
+
+### Complete CMake Example
+
+For a complete working example with a library package and consumer project, see the [examples/cmake-example](examples/cmake-example/) directory. The example includes:
+
+- A sample library with proper CMake package configuration
+- A project that consumes the library using Qompoter
+- Step-by-step instructions for building and running
+- Detailed comments explaining each part
 
 Let's start coding!
 

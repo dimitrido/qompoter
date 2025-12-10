@@ -1,0 +1,13 @@
+{
+  "name": "example/my-library",
+  "version": "v1.0.0",
+  "description": "Example library with CMake support for Qompoter",
+  "type": "source-raw",
+  "keywords": ["example", "cmake", "library"],
+  "authors": [
+    {
+      "name": "Qompoter Example",
+      "homepage": "https://github.com/fylhan/qompoter"
+    }
+  ]
+}

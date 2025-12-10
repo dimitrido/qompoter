@@ -14,3 +14,9 @@ commit-*
 *.deb
 resources/*/DEBIAN
 resources/*/usr
+
+# Example build artifacts
+examples/*/build/
+examples/*/local-repo/
+examples/*/my-project/vendor/
+examples/*/my-project/qompoter.lock
