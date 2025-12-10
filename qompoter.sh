@@ -573,6 +573,7 @@ finalizeVendorCmake()
 {
   local vendorCmakeFilepath=$1
   local qompoterLockFile=$2
+  local vendorDir=$3
   local requires
   requires=$(getProjectRequiresFromLock "${qompoterLockFile}")
   
@@ -585,8 +586,15 @@ EOF
   
   for packageInfo in ${requires}; do
     local packageName
+    local vendorName
+    vendorName=$(echo "${packageInfo}" | cut -d'/' -f1)
     packageName=$(echo "${packageInfo}" | cut -d'/' -f2)
-    echo "list(APPEND QOMPOTER_PACKAGES ${packageName})" >> "${vendorCmakeFilepath}"
+    local packageDir=${vendorDir}/${packageName}
+    
+    # Only add packages that have CMakeLists.txt
+    if [ -f "${packageDir}/CMakeLists.txt" ]; then
+      echo "list(APPEND QOMPOTER_PACKAGES ${packageName})" >> "${vendorCmakeFilepath}"
+    fi
   done
   
   cat << 'EOF' >> "${vendorCmakeFilepath}"
@@ -2419,7 +2427,7 @@ installAction()
   if [[ "${globalRes}" == 0 ]] || [[ "${IS_BYPASS}" == "1" ]]; then
     mv "${vendorPriFile}.tmp" "${vendorPriFile}"
     if [ -f "${vendorCmakeFile}.tmp" ]; then
-      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}"
+      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}" "${vendorDir}"
       mv "${vendorCmakeFile}.tmp" "${vendorCmakeFile}"
     fi
   else
@@ -2455,7 +2463,7 @@ updateAction()
     mv "${qompoterLockFile}.tmp" "${qompoterLockFile}"
     mv "${vendorPriFile}.tmp" "${vendorPriFile}"
     if [ -f "${vendorCmakeFile}.tmp" ]; then
-      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}"
+      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}" "${vendorDir}"
       mv "${vendorCmakeFile}.tmp" "${vendorCmakeFile}"
     fi
   else
@@ -2537,7 +2545,7 @@ updateOneAction()
     mv "${qompoterLockFile}.tmp" "${qompoterLockFile}"
     mv "${vendorPriFile}.tmp" "${vendorPriFile}"
     if [ -f "${vendorCmakeFile}.tmp" ]; then
-      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}"
+      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}" "${vendorDir}"
       mv "${vendorCmakeFile}.tmp" "${vendorCmakeFile}"
     fi
   else
@@ -2647,7 +2655,7 @@ refreshVendorCmakeAction()
 
   # Replace existing vendor.cmake file in case of success
   if [[ "${IS_DRYRUN}" == "1" ]]; then
-    finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}"
+    finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}" "${vendorDir}"
     diff -q "${vendorCmakeFile}" "${vendorCmakeFile}.tmp" > /dev/null 2>&1
     if [[ "$?" == 1 ]]; then
       echo "Changes to be expected on ${vendorCmakeFile}"
@@ -2658,7 +2666,7 @@ refreshVendorCmakeAction()
     rm "${vendorCmakeFile}.tmp"
   else
     if [[ "${globalRes}" == 0 ]] || [[ "${IS_BYPASS}" == "1" ]]; then
-      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}"
+      finalizeVendorCmake "${vendorCmakeFile}.tmp" "${qompoterLockFile}" "${vendorDir}"
       diff -q "${vendorCmakeFile}" "${vendorCmakeFile}.tmp" > /dev/null 2>&1
       if [[ "$?" == 1 ]]; then
         echo "Changes applied on ${vendorCmakeFile}"
