@@ -2808,6 +2808,99 @@ showAction()
   echo
 }
 
+convertAction()
+{
+  local projectDir=${1:-.}
+  local dryRun=${IS_DRYRUN}
+  
+  echo "Converting QMake project to prepare for qmake2cmake..."
+  echo "Project directory: ${projectDir}"
+  echo
+  
+  # Find all .pro files in the project
+  local proFiles=$(find "${projectDir}" -name "*.pro" -type f)
+  
+  if [ -z "${proFiles}" ]; then
+    echo "No .pro files found in ${projectDir}"
+    return 1
+  fi
+  
+  # Process each .pro file
+  for proFile in ${proFiles}; do
+    echo "Processing: ${proFile}"
+    
+    # Create backup
+    if [ "${dryRun}" != "1" ]; then
+      cp "${proFile}" "${proFile}.bak"
+      echo "  Backup created: ${proFile}.bak"
+    fi
+    
+    # Remove qompoter-specific includes and functions
+    if [ "${dryRun}" == "1" ]; then
+      echo "  [DRY RUN] Would remove qompoter.pri includes"
+      echo "  [DRY RUN] Would remove $$setLibPath() calls"
+      echo "  [DRY RUN] Would remove vendor.pri includes"
+      echo "  [DRY RUN] Would remove vendor subdir"
+    else
+      # Remove include($$PWD/qompoter.pri) and similar
+      sed -i '/include.*qompoter\.pri/d' "${proFile}"
+      
+      # Remove include(vendor/vendor.pri) and similar
+      sed -i '/include.*vendor\.pri/d' "${proFile}"
+      
+      # Remove $$setLibPath() calls
+      sed -i '/\$\$setLibPath()/d' "${proFile}"
+      
+      # Remove SUBDIRS += vendor
+      sed -i '/SUBDIRS.*vendor/d' "${proFile}"
+      
+      echo "  Removed qompoter-specific references"
+    fi
+    
+    # Look for .qmake.conf in the same directory
+    local proDir=$(dirname "${proFile}")
+    local qmakeConf="${proDir}/.qmake.conf"
+    
+    if [ -f "${qmakeConf}" ]; then
+      echo "  Found .qmake.conf: ${qmakeConf}"
+      
+      if [ "${dryRun}" == "1" ]; then
+        echo "  [DRY RUN] Would merge .qmake.conf into .pro file"
+      else
+        # Merge .qmake.conf content into .pro file
+        echo "" >> "${proFile}"
+        echo "# Configuration from .qmake.conf (merged by qompoter convert)" >> "${proFile}"
+        cat "${qmakeConf}" >> "${proFile}"
+        echo "" >> "${proFile}"
+        echo "  Merged .qmake.conf content into .pro file"
+        
+        # Optionally remove .qmake.conf (or rename it)
+        mv "${qmakeConf}" "${qmakeConf}.converted"
+        echo "  Renamed .qmake.conf to .qmake.conf.converted"
+      fi
+    fi
+    
+    echo "  ✓ Processed ${proFile}"
+    echo
+  done
+  
+  if [ "${dryRun}" == "1" ]; then
+    echo "Dry run completed. Run without --dry-run to apply changes."
+    echo "Note: Backup files (.bak) will be created for all .pro files."
+  else
+    echo "Conversion completed!"
+    echo ""
+    echo "Next steps:"
+    echo "1. Review the changes in your .pro files"
+    echo "2. Run qmake2cmake to convert to CMake"
+    echo "3. Test the generated CMakeLists.txt files"
+    echo ""
+    echo "To restore original files, use the .bak backups"
+  fi
+  
+  return 0
+}
+
 repoExportAction()
 {
   local qompoterFile=$1
@@ -2956,7 +3049,7 @@ help()
 	Usage: $C_PROGNAME [action] [ --repo <repo> | other options ]
 
 	    action               Select an action:
-	                          add, build, export, init, inspect, install, refresh-vendor-cmake, refresh-vendor-pri, show
+	                          add, build, convert, export, init, inspect, install, refresh-vendor-cmake, refresh-vendor-pri, show
 	                          update, updateOne
 
 	                         Other actions are useful for digging into Qompoter:
@@ -2975,7 +3068,7 @@ help()
 	                          subpackages [default = $DEPTH_SIZE]
 	                          
 	    --dry-run             Display stuff but do not really do things [default = $DRY_RUN]
-	                          Supported actions are: refresh-vendor-cmake, refresh-vendor-pri
+	                          Supported actions are: convert, refresh-vendor-cmake, refresh-vendor-pri
 
 	    --inqlude-file FILE   Pick the provided file to search into the
 	                          inqlude repository
@@ -3073,6 +3166,12 @@ help()
 
 	    Build all CMake dependencies and install them to vendor/install:
 	      $C_PROGNAME build
+
+	    Convert QMake project to prepare for qmake2cmake (removes qompoter references):
+	      $C_PROGNAME convert
+
+	    Convert QMake project with dry run to see what would be changed:
+	      $C_PROGNAME convert --dry-run
 
 	    List required dependencies for this project (i.e. show Qompoter file):
 	      $C_PROGNAME show
@@ -3351,6 +3450,11 @@ main()
       echo
       # Use default install prefix (vendor/install)
       buildAction "${QOMPOTER_FILENAME}" "${VENDOR_DIR}"
+      ;;
+    "convert")
+      echo "======== ${ACTION}"
+      echo
+      convertAction "."
       ;;
     "export")
       echo "======== ${ACTION}"
