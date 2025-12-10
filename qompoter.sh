@@ -2838,18 +2838,26 @@ convertAction()
     # Remove qompoter-specific includes and functions
     if [ "${dryRun}" == "1" ]; then
       echo "  [DRY RUN] Would remove qompoter.pri includes"
+      echo "  [DRY RUN] Would remove qompote.pri includes"
       echo "  [DRY RUN] Would remove $$setLibPath() calls"
+      echo "  [DRY RUN] Would remove $$setBuildDir() calls"
       echo "  [DRY RUN] Would remove vendor.pri includes"
       echo "  [DRY RUN] Would remove vendor subdir"
     else
       # Remove include($$PWD/qompoter.pri) and similar
       sed -i '/include.*qompoter\.pri/d' "${proFile}"
       
+      # Remove include(qompote.pri) and similar
+      sed -i '/include.*qompote\.pri/d' "${proFile}"
+      
       # Remove include(vendor/vendor.pri) and similar
       sed -i '/include.*vendor\.pri/d' "${proFile}"
       
       # Remove $$setLibPath() calls
       sed -i '/\$\$setLibPath()/d' "${proFile}"
+      
+      # Remove $$setBuildDir() calls
+      sed -i '/\$\$setBuildDir()/d' "${proFile}"
       
       # Remove SUBDIRS += vendor
       sed -i '/SUBDIRS.*vendor/d' "${proFile}"
