@@ -123,32 +123,38 @@ include(vendor/vendor.pri)
 
 ### Using with CMake
 
-For CMake projects, Qompoter generates a `vendor.cmake` file that automatically adds all dependencies with CMake support to the search path. Include it in your CMakeLists.txt:
+For CMake projects, Qompoter provides two workflows:
+
+#### Workflow 1: FetchContent (Recommended)
+
+Qompoter generates a `vendor.cmake` file using CMake's FetchContent to declare and make dependencies available:
 
 ```cmake
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 project(YourProject)
 
-# Include vendor.cmake to add all dependencies with CMake support
+# Include vendor.cmake to declare all dependencies via FetchContent
 include(vendor/vendor.cmake)
 
-# Now you can use find_package() for dependencies
-find_package(luke REQUIRED)
-find_package(leia REQUIRED)
-find_package(yoda REQUIRED)
+# Dependencies are now available for use
+target_link_libraries(your_target PRIVATE luke leia yoda)
 ```
 
-Note: Qompoter assumes that each dependency contains a CMake package in a `cmake/` folder at the root of the project. Only dependencies with a `cmake/` directory will be added to the CMake search path.
+**Building dependencies**: After running `qompoter update`, build all dependencies with:
 
-### CMake Package Structure
+```bash
+qompoter build
+```
 
-For a dependency to be usable with CMake through Qompoter, it should have the following structure:
+This builds each dependency in order and installs them to `vendor/install` by default, making them available to dependent packages.
+
+#### CMake Dependency Structure
+
+For a dependency to work with Qompoter's CMake integration, it needs:
 
 ```
 my-dependency/
-├── cmake/
-│   ├── my-dependencyConfig.cmake     # CMake package configuration file
-│   └── my-dependencyConfigVersion.cmake  # (optional) Version file
+├── CMakeLists.txt              # CMake build configuration
 ├── include/
 │   └── ... (header files)
 ├── src/
@@ -156,15 +162,16 @@ my-dependency/
 └── qompoter.json
 ```
 
-The `cmake/` directory should contain at minimum a `<PackageName>Config.cmake` file that defines the package for CMake's `find_package()` command. Qompoter will automatically add the package root directory to `CMAKE_PREFIX_PATH`, allowing CMake to discover the package.
+The `CMakeLists.txt` should:
+- Define targets with `add_library()` or `add_executable()`
+- Set up proper install rules with `install(TARGETS ...)` and `install(EXPORT ...)`
+- Use generator expressions for include directories (e.g., `$<BUILD_INTERFACE:...>` and `$<INSTALL_INTERFACE:...>`)
 
-You can regenerate the `vendor.cmake` file at any time using:
+#### Commands
 
-```bash
-qompoter refresh-vendor-cmake
-```
-
-This is useful if you manually add or remove packages from the vendor directory or if you need to update the CMake configuration without re-downloading dependencies.
+- **Fetch dependencies**: `qompoter update` - Downloads dependencies and generates `vendor.cmake`
+- **Build dependencies**: `qompoter build` - Builds and installs all dependencies
+- **Regenerate vendor.cmake**: `qompoter refresh-vendor-cmake` - Updates the CMake file without re-downloading
 
 ### Complete CMake Example
 
